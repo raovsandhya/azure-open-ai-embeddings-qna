@@ -47,7 +47,7 @@ try :
 
     # Chat 
     clear_chat = st.button("Clear chat", key="clear_chat", on_click=clear_chat_data)
-    input_text = st.text_input("You: ", placeholder="type your question", value=st.session_state.chat_askedquestion, key="input"+str(st.session_state ['input_message_key']), on_change=questionAsked)
+    input_text = st.text_input("Sandhya: ", placeholder="type your question", value=st.session_state.chat_askedquestion, key="input"+str(st.session_state ['input_message_key']), on_change=questionAsked)
 
 
     # If a question is asked execute the request to get the result, context, sources and up to 3 follow-up questions proposals
