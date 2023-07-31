@@ -1,0 +1,51 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy container app to Azure Web App - wavesuite-site
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: 'ubuntu-latest'
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Log in to registry
+      uses: docker/login-action@v2
+      with:
+        registry: https://index.docker.io/v1/
+        username: ${{ secrets.AzureAppService_ContainerUsername_a8e5f118ee574f6aa6ede6d641031edd }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_f40bdfe7f85a4e0699f2c1a662b69504 }}
+
+    - name: Build and push container image to registry
+      uses: docker/build-push-action@v3
+      with:
+        push: true
+        tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_a8e5f118ee574f6aa6ede6d641031edd }}/sandhyavr/oai-embeddings:${{ github.sha }}
+        file: ./Dockerfile
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+    - name: Deploy to Azure Web App
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'wavesuite-site'
+        slot-name: 'production'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_aef32e524ab145a293067f997f82cb09 }}
+        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_a8e5f118ee574f6aa6ede6d641031edd }}/sandhyavr/oai-embeddings:${{ github.sha }}'
